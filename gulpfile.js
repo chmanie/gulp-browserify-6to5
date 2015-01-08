@@ -17,6 +17,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var jshint = require('gulp-jshint');
 var runSequence = require('run-sequence');
 var connect = require('gulp-connect');
+var sass = require('gulp-sass');
 
 var DIST = false;
 var DEST_PATH = './.tmp';
@@ -35,11 +36,22 @@ gulp.task('connect', function () {
 
 gulp.task('watch', ['connect'], function () {
   gulp.watch('./src/**/*.html', ['html']);
+  gulp.watch('./src/**/*.scss', ['sass']);
   gulp.watch('./src/**/*.js', ['browserify']);
 });
 
 gulp.task('serve', function (done) {
-  runSequence('lint', ['browserify'], 'watch', done);
+  runSequence('lint', ['browserify', 'sass'], 'watch', done);
+});
+
+gulp.task('sass', function () {
+  return gulp.src('./src/sass/main.scss')
+    .pipe(sourcemaps.init())
+    .pipe(sass({
+      includePaths: './bower_components'
+    }))
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest(DEST_PATH + '/css/'));
 });
 
 gulp.task('browserify', ['lint'], function() {
