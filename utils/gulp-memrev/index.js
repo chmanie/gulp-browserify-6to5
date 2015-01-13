@@ -1,4 +1,5 @@
 var through = require('through2');
+var gutil = require('gulp-util');
 var path = require('path');
 
 function memRev() {
@@ -29,6 +30,12 @@ memRev.replace = function replace () {
       this.push(file);
       return cb();
     }
+
+    if (file.isStream()) {
+      cb(new gutil.PluginError('gulp-rev', 'Streaming not supported'));
+      return;
+    }
+
     var contents = file.contents.toString();
     memRev.files.forEach(function (file) {
       contents = contents.replace(file.origName, file.revName);

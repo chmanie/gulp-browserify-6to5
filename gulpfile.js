@@ -9,12 +9,8 @@ var TMP_PATH = './.tmp';
 // js vendor
 // test (karma?)
 
-var browserify = require('browserify');
 var gulp = require('gulp');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
-var to5ify = require('6to5ify');
 var sourcemaps = require('gulp-sourcemaps');
 var jshint = require('gulp-jshint');
 var runSequence = require('run-sequence');
@@ -25,6 +21,10 @@ var memRev = require('./utils/gulp-memrev');
 var del = require('del');
 var cache = require('gulp-cached');
 var imagemin = require('gulp-imagemin');
+var plumber = require('gulp-plumber');
+var notify = require('gulp-notify');
+var browserify = require('./utils/gulp-browserify');
+var to5ify = require('6to5ify');
 
 var DIST = false;
 var CURRENT_PATH = TMP_PATH;
@@ -79,30 +79,30 @@ gulp.task('sass', function () {
     .pipe(gulp.dest(CURRENT_PATH + '/css/'));
 });
 
+gulp.task('bftest', function () {
+
+});
+
 gulp.task('browserify', ['lint'], function() {
 
-  var bundler = browserify({
-    entries: [SRC_PATH + '/js/index.js'],
-    debug: !DIST
-  });
+  var stream = gulp.src([SRC_PATH + '/js/index.js'])
+    .pipe(plumber({errorHandler: notify.onError("Browserify: <%= error.message %>")}))
+    .pipe(browserify({
+      fileName: 'bundle.js',
+      transform: to5ify
+    }));
 
-  var bundle = function() {
-    var stream = bundler
-    	.transform(to5ify)
-      .bundle()
-      .pipe(source('bundle.js'))
-      .pipe(buffer());
-    if (DIST) {
-      stream.pipe(uglify())
+  if (DIST) {
+    stream
+      .pipe(uglify())
       .pipe(rev())
       .pipe(memRev());
-    }
-    stream.pipe(gulp.dest(CURRENT_PATH + '/js/'));
-    if (!DIST) stream.pipe(connect.reload());
-    return stream;
-  };
+  }
 
-  return bundle();
+  stream.pipe(gulp.dest(CURRENT_PATH + '/js/'));
+
+  if (!DIST) stream.pipe(connect.reload());
+  return stream;
 });
 
 gulp.task('lint', function () {
