@@ -4,4 +4,6 @@ class ES6Test {
 	}
 }
 
+console.log('hund');
+
 export default ES6Test;
