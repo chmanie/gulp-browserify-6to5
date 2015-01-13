@@ -5,9 +5,10 @@ var DIST_PATH = './dist';
 var TMP_PATH = './.tmp';
 
 // TODO:
-// gulp notify
+// gulp notify everywhere
 // js vendor
 // test (karma?)
+// gulp load-plugins?
 
 var gulp = require('gulp');
 var uglify = require('gulp-uglify');
@@ -64,19 +65,24 @@ gulp.task('watch', ['connect'], function () {
 });
 
 gulp.task('serve', function (done) {
-  runSequence('lint', ['browserify', 'sass'], 'watch', done);
+  runSequence('clean', 'lint', ['browserify', 'sass'], 'watch', done);
 });
 
 gulp.task('sass', function () {
-  return gulp.src(SRC_PATH + '/sass/main.scss')
+  var stream = gulp.src(SRC_PATH + '/sass/main.scss')
     .pipe(sourcemaps.init())
     .pipe(sass({
       includePaths: './bower_components'
     }))
-    .pipe(sourcemaps.write())
-    .pipe(rev())
-    .pipe(memRev())
-    .pipe(gulp.dest(CURRENT_PATH + '/css/'));
+    .pipe(sourcemaps.write());
+
+  if (DIST) {
+    stream
+      .pipe(rev())
+      .pipe(memRev());
+  }
+
+  return stream.pipe(gulp.dest(CURRENT_PATH + '/css/'));
 });
 
 gulp.task('bftest', function () {
