@@ -4,6 +4,6 @@ class ES6Test {
 	}
 }
 
-console.log('hund');
+console.log('mithund');
 
 export default ES6Test;

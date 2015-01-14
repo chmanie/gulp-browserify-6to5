@@ -85,12 +85,7 @@ gulp.task('sass', function () {
   return stream.pipe(gulp.dest(CURRENT_PATH + '/css/'));
 });
 
-gulp.task('bftest', function () {
-
-});
-
 gulp.task('browserify', ['lint'], function() {
-
   var stream = gulp.src([SRC_PATH + '/js/index.js'])
     .pipe(plumber({errorHandler: notify.onError("Browserify: <%= error.message %>")}))
     .pipe(browserify({
@@ -113,12 +108,11 @@ gulp.task('browserify', ['lint'], function() {
 
 gulp.task('lint', function () {
   var stream = gulp.src(SRC_PATH + '/js/**/*.js')
+    .pipe(plumber({errorHandler: notify.onError("<%= error.message %>")}))
     .pipe(cache('linting'))
     .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish'));
-  if (DIST) {
-    stream.pipe(jshint.reporter('fail'));
-  }
+    .pipe(jshint.reporter('jshint-stylish'))
+    .pipe(jshint.reporter('fail'));
   return stream;
 });
 

@@ -34,16 +34,14 @@ function gulpBrowserify(options) {
       debug: config.debug
     });
 
-    var stream = bundler;
-
     if(!Array.isArray(config.transform)) config.transform = [config.transform];
     if (config.transform.length) {
       config.transform.forEach(function (tr) {
-        stream.transform(tr).on('error', cb);
+        bundler.transform(tr).on('error', cb);
       });
     }
 
-    stream.bundle()
+    bundler.bundle()
       .on('error', cb)
       .pipe(source(config.fileName))
       .pipe(buffer())
