@@ -22,7 +22,7 @@ var cache = require('gulp-cached');
 var imagemin = require('gulp-imagemin');
 var plumber = require('gulp-plumber');
 var notify = require('gulp-notify');
-var browserify = require('./utils/gulp-browserify');
+var browserify = require('gulp-browserify2');
 var to5ify = require('6to5ify');
 
 var DIST = false;
