@@ -5,9 +5,7 @@ var DIST_PATH = './dist';
 var TMP_PATH = './.tmp';
 
 // TODO:
-// gulp notify everywhere
 // js vendor
-// test (karma?)
 // gulp load-plugins?
 
 var gulp = require('gulp');
@@ -70,6 +68,7 @@ gulp.task('serve', function (done) {
 
 gulp.task('sass', function () {
   var stream = gulp.src(SRC_PATH + '/sass/main.scss')
+    .pipe(plumber({errorHandler: notify.onError('Sass: <%= error.message %>')}))
     .pipe(sourcemaps.init())
     .pipe(sass({
       includePaths: './bower_components'
@@ -86,11 +85,14 @@ gulp.task('sass', function () {
 });
 
 gulp.task('browserify', ['lint'], function() {
-  var stream = gulp.src([SRC_PATH + '/js/index.js'])
-    .pipe(plumber({errorHandler: notify.onError("Browserify: <%= error.message %>")}))
+  var stream = gulp.src([SRC_PATH + '/js/index.js', SRC_PATH + '/js/index2.js'])
+    .pipe(plumber({errorHandler: notify.onError('Browserify: <%= error.message %>')}))
     .pipe(browserify({
       fileName: 'bundle.js',
-      transform: to5ify
+      transform: to5ify,
+      options: {
+        debug: false
+      }
     }));
 
   if (DIST) {
@@ -108,7 +110,7 @@ gulp.task('browserify', ['lint'], function() {
 
 gulp.task('lint', function () {
   var stream = gulp.src(SRC_PATH + '/js/**/*.js')
-    .pipe(plumber({errorHandler: notify.onError("<%= error.message %>")}))
+    .pipe(plumber({errorHandler: notify.onError('<%= error.message %>')}))
     .pipe(cache('linting'))
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'))

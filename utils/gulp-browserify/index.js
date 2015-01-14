@@ -6,12 +6,12 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var merge = require('deepmerge');
 
-// TODO: handle browserify options
-
 var defaults = {
   fileName: 'bundle.js',
-  debug: true,
-  transform: []
+  transform: [],
+  options: {
+    debug: true
+  }
 };
 
 function gulpBrowserify(options) {
@@ -20,24 +20,35 @@ function gulpBrowserify(options) {
 
   var config = merge(defaults, options);
 
+  var cache = [];
+
   return through.obj(function (file, enc, cb) {
 
-    if (file.isStream()) {
-      cb(new gutil.PluginError('gulp-browserify', 'Streaming not supported'));
-      return;
+    if (!file.path) {
+      return cb(new gutil.PluginError('gulp-browserify', 'File not supported'));
     }
 
-    var thr = this;
+    // cache every js file path as entry point for later
+    cache.push(file.path);
 
-    var bundler = browserify({
-      entries: [file.path],
-      debug: config.debug
-    });
+    cb();
+
+  }, function (cb) {
+
+    var trs = this;
+
+    var browserifyOpts = merge(config.options, { entries: cache });
+
+    var bundler = browserify(browserifyOpts);
 
     if(!Array.isArray(config.transform)) config.transform = [config.transform];
     if (config.transform.length) {
-      config.transform.forEach(function (tr) {
-        bundler.transform(tr).on('error', cb);
+      config.transform.forEach(function (transform) {
+        if (transform.tr) {
+          bundler.transform(transform.tr, transform.options).on('error', cb);
+        } else {
+          bundler.transform(transform).on('error', cb);
+        }
       });
     }
 
@@ -46,7 +57,7 @@ function gulpBrowserify(options) {
       .pipe(source(config.fileName))
       .pipe(buffer())
       .on('data', function (chunk) {
-        thr.push(chunk);
+        trs.push(chunk);
       })
       .on('end', cb);
   });
