@@ -9,6 +9,7 @@ var TMP_PATH = './.tmp';
 // gulp load-plugins?
 
 var gulp = require('gulp');
+var autoprefixer = require('gulp-autoprefixer');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var jshint = require('gulp-jshint');
@@ -73,6 +74,12 @@ gulp.task('sass', function () {
     .pipe(sass({
       includePaths: './bower_components'
     }))
+     // will probably break sourcemaps?
+    .pipe(autoprefixer({
+        browsers: ['last 2 versions'],
+        cascade: false,
+        remove: true
+      }))
     .pipe(sourcemaps.write());
 
   if (DIST) {
