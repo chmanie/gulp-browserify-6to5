@@ -6,24 +6,13 @@ var TMP_PATH = './.tmp';
 
 // TODO:
 // js vendor
-// gulp load-plugins?
 
 var gulp = require('gulp');
-var autoprefixer = require('gulp-autoprefixer');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
-var jshint = require('gulp-jshint');
+var g = require('gulp-load-plugins')();
+
 var runSequence = require('run-sequence');
-var connect = require('gulp-connect');
-var sass = require('gulp-sass');
-var rev = require('gulp-rev');
 var memRev = require('./utils/gulp-memrev');
 var del = require('del');
-var cache = require('gulp-cached');
-var imagemin = require('gulp-imagemin');
-var plumber = require('gulp-plumber');
-var notify = require('gulp-notify');
-var browserify = require('gulp-browserify2');
 var to5ify = require('6to5ify');
 var karma = require('karma');
 
@@ -40,19 +29,19 @@ gulp.task('html', function () {
     stream.pipe(memRev.replace())
       .pipe(gulp.dest(CURRENT_PATH));
   } else {
-    stream.pipe(connect.reload());
+    stream.pipe(g.connect.reload());
   }
   return stream;
 });
 
 gulp.task('images', function () {
   return gulp.src([SRC_PATH + '/images/**/*'])
-    .pipe(imagemin())
+    .pipe(g.imagemin())
     .pipe(gulp.dest(CURRENT_PATH + '/images'));
 });
 
 gulp.task('connect', function () {
-  connect.server({
+  g.connect.server({
     root: [SRC_PATH, TMP_PATH],
     livereload: true
   });
@@ -70,22 +59,22 @@ gulp.task('serve', function (done) {
 
 gulp.task('sass', function () {
   var stream = gulp.src(SRC_PATH + '/sass/main.scss')
-    .pipe(plumber({errorHandler: notify.onError('Sass: <%= error.message %>')}))
-    .pipe(sourcemaps.init())
-    .pipe(sass({
+    .pipe(g.plumber({errorHandler: g.notify.onError('Sass: <%= error.message %>')}))
+    .pipe(g.sourcemaps.init())
+    .pipe(g.sass({
       includePaths: './bower_components'
     }))
      // will probably break sourcemaps?
-    .pipe(autoprefixer({
+    .pipe(g.autoprefixer({
         browsers: ['last 2 versions'],
         cascade: false,
         remove: true
       }))
-    .pipe(sourcemaps.write());
+    .pipe(g.sourcemaps.write());
 
   if (DIST) {
     stream
-      .pipe(rev())
+      .pipe(g.rev())
       .pipe(memRev());
   }
 
@@ -94,8 +83,8 @@ gulp.task('sass', function () {
 
 gulp.task('browserify', ['lint'], function() {
   var stream = gulp.src(SRC_PATH + '/js/index.js')
-    .pipe(plumber({errorHandler: notify.onError('Browserify: <%= error.message %>')}))
-    .pipe(browserify({
+    .pipe(g.plumber({errorHandler: g.notify.onError('Browserify: <%= error.message %>')}))
+    .pipe(g.browserify2({
       fileName: 'bundle.js',
       transform: to5ify,
       options: {
@@ -105,24 +94,24 @@ gulp.task('browserify', ['lint'], function() {
 
   if (DIST) {
     stream
-      .pipe(uglify())
-      .pipe(rev())
+      .pipe(g.uglify())
+      .pipe(g.rev())
       .pipe(memRev());
   }
 
   stream.pipe(gulp.dest(CURRENT_PATH + '/js/'));
 
-  if (!DIST) stream.pipe(connect.reload());
+  if (!DIST) stream.pipe(g.connect.reload());
   return stream;
 });
 
 gulp.task('lint', function () {
   var stream = gulp.src(SRC_PATH + '/js/**/*.js')
-    .pipe(plumber({errorHandler: notify.onError('<%= error.message %>')}))
-    .pipe(cache('linting'))
-    .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish'))
-    .pipe(jshint.reporter('fail'));
+    .pipe(g.plumber({errorHandler: g.notify.onError('<%= error.message %>')}))
+    .pipe(g.cached('linting'))
+    .pipe(g.jshint())
+    .pipe(g.jshint.reporter('jshint-stylish'))
+    .pipe(g.jshint.reporter('fail'));
   return stream;
 });
 
