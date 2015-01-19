@@ -25,6 +25,7 @@ var plumber = require('gulp-plumber');
 var notify = require('gulp-notify');
 var browserify = require('gulp-browserify2');
 var to5ify = require('6to5ify');
+var karma = require('karma');
 
 var DIST = false;
 var CURRENT_PATH = TMP_PATH;
@@ -92,13 +93,13 @@ gulp.task('sass', function () {
 });
 
 gulp.task('browserify', ['lint'], function() {
-  var stream = gulp.src([SRC_PATH + '/js/index.js', SRC_PATH + '/js/index2.js'])
+  var stream = gulp.src(SRC_PATH + '/js/index.js')
     .pipe(plumber({errorHandler: notify.onError('Browserify: <%= error.message %>')}))
     .pipe(browserify({
       fileName: 'bundle.js',
       transform: to5ify,
       options: {
-        debug: false
+        debug: !DIST
       }
     }));
 
@@ -123,6 +124,13 @@ gulp.task('lint', function () {
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jshint.reporter('fail'));
   return stream;
+});
+
+gulp.task('test', function (done) {
+  karma.runner.run({port: 9876}, function(exitCode) {
+    if (exitCode) return done('Karma tests failed');
+    return done();
+  });
 });
 
 gulp.task('dist', function (done) {

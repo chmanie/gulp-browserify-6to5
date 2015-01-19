@@ -1,3 +1,3 @@
-import ES6Test from './es6test';
+import SomeClass from './some_class';
 
-let x = new ES6Test();
+let x = new SomeClass();
