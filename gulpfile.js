@@ -13,7 +13,7 @@ var g = require('gulp-load-plugins')();
 var runSequence = require('run-sequence');
 var memRev = require('./utils/gulp-memrev');
 var del = require('del');
-var to5ify = require('6to5ify');
+var babelify = require('babelify');
 var karma = require('karma');
 
 var DIST = false;
@@ -86,7 +86,7 @@ gulp.task('browserify', ['lint'], function() {
     .pipe(g.plumber({errorHandler: g.notify.onError('Browserify: <%= error.message %>')}))
     .pipe(g.browserify2({
       fileName: 'bundle.js',
-      transform: to5ify,
+      transform: babelify,
       options: {
         debug: !DIST
       }

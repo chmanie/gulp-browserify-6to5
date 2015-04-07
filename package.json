@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": "https://github.com/chmanie/gulp-browserify-6to5.git",
   "devDependencies": {
-    "6to5ify": "^3.1.2",
+    "babelify": "^3.1.2",
     "del": "^1.1.1",
     "gulp-autoprefixer": "^2.1.0",
     "gulp-browserify2": "0.0.2",
